@@ -48,7 +48,7 @@ mat4 inverse(mat4 m){
 void main(){
 	// Multiply the position by the matrix.
 	gl_Position=u_matrix*a_position;
-	gl_PointSize=(30.*(length(vec4(0,0,0,0)-u_matrix*a_position)));
+	gl_PointSize=(30.*(length(vec4(0,0,0,1)-inverse(u_matrix)*a_position)));
 	
 	vColor=(vec4(1,1,1,1)-normalize(a_position))*((2.-length((a_position))));
 	
