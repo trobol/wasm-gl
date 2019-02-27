@@ -7,8 +7,9 @@ void main(){
 	vec2 cxy=2.*gl_PointCoord-1.;
 	r=dot(cxy,cxy);
 	delta=.01;
-	alpha=1.-smoothstep(1.-delta,1.+delta,r);
+	alpha=1.-smoothstep(1.-delta,1.+delta,r*6.);
 	vec4 color=vColor;
-	color.a=alpha;
+	color.a=max(1.-abs(length(cxy*.8)),alpha);
+	color*=color.a*.8;
 	gl_FragColor=color;
 }

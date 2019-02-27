@@ -43,20 +43,18 @@ function main() {
 	}
 	var translation = [100, 70, 0];
 	var rotation = [0, 0, 0];
-	var scale = [100, 100, 100];
+	var scale = [200, 200, 200];
 	var color = [Math.random(), Math.random(), Math.random(), 1];
 	drawScene();
 
 	// Draw the scene.
 	function drawScene() {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		rotation[2] += 0.01;
-		rotation[1] += 0.01;
+		rotation[2] += 0.001;
+		rotation[1] += 0.001;
 
 
 		gl.resize();
-
-
 		// Clear the canvas.
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
