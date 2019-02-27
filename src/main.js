@@ -21,6 +21,7 @@ function main() {
 
 	// lookup uniforms
 	var matrixLocation = gl.getUniformLocation(program, "u_matrix");
+	var resolutionLocation = gl.getUniformLocation(program, "u_resolution");
 
 	// Create a buffer to put positions in
 	var positionBuffer = gl.createBuffer();
@@ -55,6 +56,7 @@ function main() {
 
 
 		gl.resize();
+		gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
 		// Clear the canvas.
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
