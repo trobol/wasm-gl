@@ -12,8 +12,16 @@ export const void *projection(float width, float height, float depth)
 	return a;
 }
 
-/*
-void multiply(float[] a, float[] b)
+export const void *translation (float tx, float ty, float tz) {
+		float a[16] = {
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			tx, ty, tz, 1,
+		};
+		return a;
+	}
+export const void * multiply(float *a, float *b)
 {
 	float a00 = a[0 * 4 + 0],
 		  a01 = a[0 * 4 + 1],
@@ -47,7 +55,7 @@ void multiply(float[] a, float[] b)
 		  b31 = b[3 * 4 + 1],
 		  b32 = b[3 * 4 + 2],
 		  b33 = b[3 * 4 + 3];
-	float array[] = {
+	float array[16] = {
 		b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
 		b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31,
 		b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32,
@@ -65,8 +73,9 @@ void multiply(float[] a, float[] b)
 		b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32,
 		b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33,
 	};
+	return array;
 }
-*/
+
 /*
 void projection(float width, float height, float depth)
 {

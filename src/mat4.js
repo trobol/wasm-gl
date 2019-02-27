@@ -39,10 +39,21 @@ loadWebAssembly('/src/mat4.wasm', i).then(instance => {
 
 	var exports = instance.exports;
 	window.mat4 = {};
+	console.log(exports);
 	window.mat4.projection = function (width, height, depth) {
 		var offset = exports.projection(width, height, depth);
-		console.log(offset);
-		console.log(i.env.memory.buffer);
+
+		return new Float32Array(i.env.memory.buffer, offset, 16);
+
+	}
+	window.mat4.translation = function (tx, ty, tz) {
+		var offset = exports.translation(tx, ty, tz);
+
+		return new Float32Array(i.env.memory.buffer, offset, 16);
+
+	}
+	window.mat4.multiply = function (a, b) {
+		var offset = exports.multiply(a.byteOffset, b.byteOffset);
 		return new Float32Array(i.env.memory.buffer, offset, 16);
 
 	}

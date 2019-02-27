@@ -10,6 +10,6 @@ void main(){
 	alpha=1.-smoothstep(1.-delta,1.+delta,r*6.);
 	vec4 color=vColor;
 	color.a=max(1.-abs(length(cxy*.8)),alpha);
-	color*=color.a*.8;
+	color*=color.a;
 	gl_FragColor=color;
 }
