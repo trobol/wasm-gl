@@ -29,6 +29,7 @@ function main() {
 	const indexBuffer = gl.createBuffer();
 
 	gl.enable(gl.BLEND);
+	//gl.enable(gl.DEPTH_TEST);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	// Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -43,7 +44,7 @@ function main() {
 		return d * Math.PI / 180;
 	}
 	var translation = [100, 70, 0];
-	var rotation = [0, 0, 0];
+	var rotation = [degToRad(45), 0, 0];
 	var scale = [200, 200, 200];
 	var color = [Math.random(), Math.random(), Math.random(), 1];
 	drawScene();
@@ -51,7 +52,7 @@ function main() {
 	// Draw the scene.
 	function drawScene() {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		rotation[2] += 0.001;
+		//rotation[2] += 0.001;
 		rotation[1] += 0.001;
 
 
@@ -80,6 +81,7 @@ function main() {
 
 		// Compute the matrices
 		var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 1000);
+		
 		translation[0] = gl.canvas.clientWidth / 2;
 		translation[1] = gl.canvas.clientHeight / 2;
 		matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
@@ -90,7 +92,7 @@ function main() {
 
 		// Set the matrix.
 		gl.uniformMatrix4fv(matrixLocation, false, matrix);
-
+			
 		// Draw the geometry.
 		var primitiveType = gl.Point;
 		var offset = 0;
