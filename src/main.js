@@ -29,7 +29,9 @@ function main() {
 	const indexBuffer = gl.createBuffer();
 
 	gl.enable(gl.BLEND);
-	//gl.enable(gl.DEPTH_TEST);
+	gl.blendFunc(gl.ONE, gl.ONE);
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.ALWAYS);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	// Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -81,7 +83,7 @@ function main() {
 
 		// Compute the matrices
 		var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 1000);
-		
+
 		translation[0] = gl.canvas.clientWidth / 2;
 		translation[1] = gl.canvas.clientHeight / 2;
 		matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
@@ -92,7 +94,7 @@ function main() {
 
 		// Set the matrix.
 		gl.uniformMatrix4fv(matrixLocation, false, matrix);
-			
+
 		// Draw the geometry.
 		var primitiveType = gl.Point;
 		var offset = 0;

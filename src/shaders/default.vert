@@ -2,21 +2,21 @@ attribute vec4 a_position;
 
 uniform mat4 u_matrix;
 uniform vec4 u_center;
+uniform mediump vec2 u_resolution;
 
 varying lowp vec4 vColor;
-mat4 scale(mat4 m) {
-	float sx = length(vec3(m[0][0],m[1][0],m[2][0])),
-		sy = length(vec3(m[0][1],m[1][1],m[2][1])),
-		sz = length(vec3(m[0][2],m[1][2],m[2][2]));
-	return mat4(sx, 0, 0, 0,
-			0, sy, 0, 0,
-			0, 0, sz, 0,
-			0, 0, 0, 1);
-
-
+mat4 scale(mat4 m){
+	float sx=length(vec3(m[0][0],m[1][0],m[2][0])),
+	sy=length(vec3(m[0][1],m[1][1],m[2][1])),
+	sz=length(vec3(m[0][2],m[1][2],m[2][2]));
+	return mat4(sx,0,0,0,
+		0,sy,0,0,
+		0,0,sz,0,
+	0,0,0,1);
+	
 }
-vec3 inverse(vec3 v) {
-	return vec3(1./v[0], 1./v[1],1./v[2]);
+vec3 inverse(vec3 v){
+	return vec3(1./v[0],1./v[1],1./v[2]);
 }
 mat4 inverse(mat4 m){
 	float
@@ -60,12 +60,12 @@ mat4 inverse(mat4 m){
 }
 void main(){
 	// Multiply the position by the matrix.
-
-	vec4 v = (((u_matrix)*a_position)),
-	s = v*inverse(scale(u_matrix));
+	
+	vec4 v=(((u_matrix)*a_position)),
+	s=v*inverse(scale(u_matrix));
 	gl_Position=v;
-	float a = ((s+1.)/2.).z;
+	float a=((s+1.)/2.).z;
 	gl_PointSize=60.-(30.*(a*a));
-	vColor=(vec4(1,1,1,1)-normalize(a_position));
-
+	vColor=(vec4(1,1,1,1)-normalize(a_position))*(.5+a/2.);
+	
 }

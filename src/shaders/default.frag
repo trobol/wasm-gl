@@ -2,7 +2,7 @@
 varying lowp vec4 vColor;
 
 precision mediump float;
-uniform vec2 u_resolution;
+uniform mediump vec2 u_resolution;
 void main(){
 	
 	float r=0.,delta=0.,alpha=1.;
@@ -14,9 +14,8 @@ void main(){
 	alpha=1.-smoothstep(1.-delta,1.+delta,r*(a)*12.);
 	vec4 color=vColor;
 	
-	color.a=max(1.-abs(length(cxy*.8)),alpha);
+	color.a=max(1.-abs(length(cxy)),alpha);
 	color*=color.a;
 	gl_FragColor=color;
-
 	
 }
