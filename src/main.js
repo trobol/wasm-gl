@@ -1,4 +1,5 @@
 var cubeRotation = 0.0;
+var size = 10;
 var canvas;
 window.onload = () => {
 
@@ -57,7 +58,7 @@ function main() {
 		//rotation[2] += 0.001;
 		rotation[1] += 0.001;
 
-
+		
 		gl.resize();
 		gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
 		// Clear the canvas.
@@ -72,6 +73,7 @@ function main() {
 		// Bind the position buffer.
 		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
+		setGeometry(gl);
 		// Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
 		var size = 3;          // 3 components per iteration
 		var type = gl.FLOAT;   // the data is 32bit floats
@@ -247,22 +249,68 @@ var m4 = {
 
 
 var pointCount;
-// Fill the buffer with the values that define a letter 'F'.
+let a;
+let anim = 0;
+let face = 3;
+// Fill the buffer 
 function setGeometry(gl) {
-	let a = new Float32Array(3 * 10 * 10 * 10);
-	for (let x = 0; x < 10; x++) {
-		for (let y = 0; y < 10; y++) {
-			for (let z = 0; z < 30; z += 3) {
-				a[(x * 10 * 30) + (y * 30) + z] = (x - 5) / 5;
-				a[(x * 10 * 30) + (y * 30) + z + 1] = (y - 5) / 5;
-				a[(x * 10 * 30) + (y * 30) + z + 2] = (z - 15) / 15;
+	a = new Float32Array(3 * size * size * size);
+	let b = size/2;
+	c = Math.abs(Math.sin(anim));
+	c *= c;
+	if(c < 0.005) {
+		//face = Math.floor(Math.random() * 5);
+		face = (face+1)%6;
+	};
+	anim+=0.02;
+	for (let x = 0; x < size; x++) {
+		for (let y = 0; y < size; y++) {
+			for (let z = 0; z < size; z ++) {
+				
+					let d = (x * size * size * 3) + (y * size * 3) + z*3,
+					x0 = (x - b) / b;
+					y0 = (y - b) / b;
+					z0 = (z - b) / b;
+					
+				switch(face) {
+					case 0:
+						a[d] = x0*(1-(1-(y/size))*c);
+						a[d+1] = y0;
+						a[d+2] = z0*(1-(1-(y/size))*c);
+						break;
+					case 1:
+						a[d] = x0
+						a[d+1] = y0*(1-(1-(x/size))*c);;
+						a[d+2] = z0*(1-(1-(x/size))*c);
+						break;
+					case 2:
+						a[d] = x0*(1-(1-(z/size))*c);
+						a[d+1] = y0*(1-(1-(z/size))*c);
+						a[d+2] = z0;
+						break;
+					case 3:
+						a[d] = x0*(1-((y/size))*c);
+						a[d+1] = y0;
+						a[d+2] = z0*(1-((y/size))*c);
+						break;
+					case 4:
+						a[d] = x0*(1-(z/size)*c);
+						a[d+1] = y0*(1-(z/size)*c);
+						a[d+2] = z0;
+						break;
+					case 5:
+						a[d] = x0;
+						a[d+1] = y0*(1-(x/size)*c);
+						a[d+2] = z0*(1-(x/size)*c);
+						break;
+
+				}
 			}
 		}
 	}
 
-	console.log(a);
 	gl.bufferData(
 		gl.ARRAY_BUFFER,
 		a,
-		gl.STATIC_DRAW);
+		gl.DYNAMIC_DRAW);
 }
