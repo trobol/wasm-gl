@@ -23,6 +23,7 @@ function main() {
 	// lookup uniforms
 	var matrixLocation = gl.getUniformLocation(program, "u_matrix");
 	var resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+	var timeLocation = gl.getUniformLocation(program, 'u_time');
 
 	// Create a buffer to put positions in
 	var positionBuffer = gl.createBuffer();
@@ -31,9 +32,9 @@ function main() {
 
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.ONE, gl.ONE);
-	gl.enable(gl.DEPTH_TEST);
-	gl.depthFunc(gl.ALWAYS);
-	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	//gl.enable(gl.DEPTH_TEST);
+	//gl.depthFunc(gl.LESS);
+	gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA);
 	// Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 	// Put geometry data into buffer
@@ -50,44 +51,52 @@ function main() {
 	var rotation = [degToRad(45), 0, 0];
 	var scale = [200, 200, 200];
 	var color = [Math.random(), Math.random(), Math.random(), 1];
-	drawScene();
+
+	// Tell it to use our program (pair of shaders)
+	gl.useProgram(program);
+
+	// Turn on the attribute
+	gl.enableVertexAttribArray(positionLocation);
+
+	// Bind the position buffer.
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+	// Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+	var size = 3;          // 3 components per iteration
+	var type = gl.FLOAT;   // the data is 32bit floats
+	var normalize = false; // don't normalize the data
+	var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+	var offset = 0;        // start at the beginning of the buffer
+	gl.vertexAttribPointer(
+		positionLocation, size, type, normalize, stride, offset);
+	let r = rotation[1] * 20;
+	let t = (rotation[1] % 2) - rotation[1] % 1;
+
+	setGeometry(gl);
+	drawScene(0);
 
 	// Draw the scene.
-	function drawScene() {
+	function drawScene(timeStamp) {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		//rotation[2] += 0.001;
-		rotation[1] += 0.001;
 
+		rotation[2] += 0.001;
+		rotation[1] += 0.001;
+		
 		
 		gl.resize();
 		gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
-		// Clear the canvas.
-		gl.clear(gl.COLOR_BUFFER_BIT);
+		gl.uniform1f(timeLocation, timeStamp/1000); 
 
-		// Tell it to use our program (pair of shaders)
-		gl.useProgram(program);
 
-		// Turn on the attribute
-		gl.enableVertexAttribArray(positionLocation);
-
-		// Bind the position buffer.
-		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-		setGeometry(gl);
-		// Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-		var size = 3;          // 3 components per iteration
-		var type = gl.FLOAT;   // the data is 32bit floats
-		var normalize = false; // don't normalize the data
-		var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-		var offset = 0;        // start at the beginning of the buffer
-		gl.vertexAttribPointer(
-			positionLocation, size, type, normalize, stride, offset);
+		
+	
 
 		// Compute the matrices
 		var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 1000);
-
-		translation[0] = gl.canvas.clientWidth / 2;
+		var box = [translation[0]-scale[0], translation[1]-scale[1]*2];
+		translation[0] = gl.canvas.clientWidth / 2 + (t)*(box[0]/2);
 		translation[1] = gl.canvas.clientHeight / 2;
+		
 		matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
 		matrix = m4.xRotate(matrix, rotation[0]);
 		matrix = m4.yRotate(matrix, rotation[1]);
@@ -262,7 +271,7 @@ function setGeometry(gl) {
 		//face = Math.floor(Math.random() * 5);
 		face = (face+1)%6;
 	};
-	anim+=0.02;
+	anim+=0.005;
 	for (let x = 0; x < size; x++) {
 		for (let y = 0; y < size; y++) {
 			for (let z = 0; z < size; z ++) {

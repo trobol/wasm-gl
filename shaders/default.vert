@@ -3,6 +3,7 @@ attribute vec4 a_position;
 uniform mat4 u_matrix;
 uniform vec4 u_center;
 uniform mediump vec2 u_resolution;
+uniform highp float u_time;
 
 varying lowp vec4 vColor;
 mat4 scale(mat4 m){
@@ -58,6 +59,7 @@ mat4 inverse(mat4 m){
 		a31*b01-a30*b03-a32*b00,
 	a20*b03-a21*b01+a22*b00)/det;
 }
+
 void main(){
 	// Multiply the position by the matrix.
 	
