@@ -1,5 +1,6 @@
 #include "wasm.h"
-#include <math.h>
+#include "math.h"
+
 import void out(const void *, int length);
 
 export const float *projection(float width, float height, float depth)
@@ -161,6 +162,7 @@ export const float *zRotation(float angleInRadians)
 		0,
 		1,
 	};
+	return a;
 }
 
 export const float *scaling(float sx, float sy, float sz)
@@ -185,7 +187,7 @@ export const float *scaling(float sx, float sy, float sz)
 	};
 	return a;
 }
-
+/*
 export const void *translate(float m[16], float tx, float ty, float tz)
 {
 	return multiply(m, translation(tx, ty, tz));
@@ -213,4 +215,4 @@ export const void *xRotate(float m[16], float angleInRadians)
 {
 	return m4.multiply(m, m4.scaling(sx, sy, sz));
 }
-,
+*/
