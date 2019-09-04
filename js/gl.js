@@ -5,7 +5,12 @@ let gl = {
 		gl.resize();
 		gl.clearColor(0.1, 0.1, 0.1, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
+		function load(path) {
 
+			return fetch(path)
+				.then(response => { return response.text() });
+
+		}
 
 		dV = load('shaders/default.vert');
 		dF = load('shaders/default.frag');

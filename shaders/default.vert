@@ -20,6 +20,6 @@ void main(){
 	
 	gl_PointSize=60.-(30.*(a*a));
 	
-	vColor=(vec4(1,1,1,1)-normalize(v))*(.5+a/2.);
+	vColor=(vec4(1,1,1,1)-normalize(a_position))*(.5+a/2.);
 	
 }
