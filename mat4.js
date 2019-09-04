@@ -38,7 +38,7 @@ window.mat4 = function (mat) {
 }
 
 // Call our load function.
-loadWebAssembly('/mat4.wasm', i).then(({ instance }) => {
+loadWebAssembly('mat4.wasm', i).then(({ instance }) => {
 	// Grab our exports and call our main function
 
 	var exports = instance.exports;
