@@ -22,21 +22,16 @@ function main() {
 
 	// lookup uniforms
 	var matrixLocation = gl.getUniformLocation(program, "u_matrix");
-	var resolutionLocation = gl.getUniformLocation(program, "u_resolution");
 	var timeLocation = gl.getUniformLocation(program, 'u_time');
 
 	// Create a buffer to put positions in
 	var positionBuffer = gl.createBuffer();
-	const colorBuffer = gl.createBuffer();
-	const indexBuffer = gl.createBuffer();
 
 	gl.enable(gl.BLEND);
-	gl.blendFunc(gl.ONE, gl.ONE);
-	//gl.enable(gl.DEPTH_TEST);
-	//gl.depthFunc(gl.LESS);
-	gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA);
-	// Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+	gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
 	// Put geometry data into buffer
 	setGeometry(gl);
 
@@ -47,11 +42,6 @@ function main() {
 	function degToRad(d) {
 		return d * Math.PI / 180;
 	}
-	var translation = [100, 70, 0];
-	var rotation = [degToRad(45), 0, 0];
-	var scale = [200, 200, 200];
-	var color = [Math.random(), Math.random(), Math.random(), 1];
-
 	// Tell it to use our program (pair of shaders)
 	gl.useProgram(program);
 
@@ -69,48 +59,59 @@ function main() {
 	var offset = 0;        // start at the beginning of the buffer
 	gl.vertexAttribPointer(
 		positionLocation, size, type, normalize, stride, offset);
+
+
+
+
+
+
+	setGeometry(gl);
+
+
+	var translation = [100, 70, 0];
+	var rotation = [degToRad(45), 0, 0];
+	var scale = [200, 200, 200];
+
+
 	let r = rotation[1] * 20;
 	let t = (rotation[1] % 2) - rotation[1] % 1;
 
-	setGeometry(gl);
+	// Compute the matrices
+	var matrix = mat4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 1000);
+	var box = [translation[0] - scale[0], translation[1] - scale[1] * 2];
+	translation[0] = gl.canvas.clientWidth / 2 + (t) * (box[0] / 2);
+	translation[1] = gl.canvas.clientHeight / 2;
+
+	matrix.translate(translation[0], translation[1], translation[2]);
+	matrix.xRotate(rotation[0]);
+	matrix.yRotate(rotation[1]);
+	matrix.zRotate(rotation[2]);
+	matrix.scale(scale[0], scale[1], scale[2]);
+
+	console.log(matrix);
+
+
+
 	drawScene(0);
+
+
 
 	// Draw the scene.
 	function drawScene(timeStamp) {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		rotation[2] += 0.001;
-		rotation[1] += 0.001;
-		
-		
-		gl.resize();
-		gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
-		gl.uniform1f(timeLocation, timeStamp/1000); 
-
-
-		
-	
-
-		// Compute the matrices
-		var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 1000);
-		var box = [translation[0]-scale[0], translation[1]-scale[1]*2];
-		translation[0] = gl.canvas.clientWidth / 2 + (t)*(box[0]/2);
-		translation[1] = gl.canvas.clientHeight / 2;
-		
-		matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
-		matrix = m4.xRotate(matrix, rotation[0]);
-		matrix = m4.yRotate(matrix, rotation[1]);
-		matrix = m4.zRotate(matrix, rotation[2]);
-		matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
-
+		matrix.xRotate(0.002);
+		matrix.yRotate(0.001);
 		// Set the matrix.
-		gl.uniformMatrix4fv(matrixLocation, false, matrix);
+		gl.uniformMatrix4fv(matrixLocation, false, matrix.mat);
 
-		// Draw the geometry.
-		var primitiveType = gl.Point;
-		var offset = 0;
-		var count = 1000;
-		gl.drawArrays(primitiveType, offset, count);
+
+		gl.resize();
+
+		gl.uniform1f(timeLocation, timeStamp / 1000);
+
+
+		gl.drawArrays(gl.Point, 0, 1000);
 		requestAnimationFrame(drawScene);
 	}
 }
@@ -264,56 +265,27 @@ let face = 3;
 // Fill the buffer 
 function setGeometry(gl) {
 	a = new Float32Array(3 * size * size * size);
-	let b = size/2;
+	let b = size / 2;
 	c = Math.abs(Math.sin(anim));
 	c *= c;
-	if(c < 0.005) {
+	if (c < 0.005) {
 		//face = Math.floor(Math.random() * 5);
-		face = (face+1)%6;
+		face = (face + 1) % 6;
 	};
-	anim+=0.005;
+	anim += 0.005;
 	for (let x = 0; x < size; x++) {
 		for (let y = 0; y < size; y++) {
-			for (let z = 0; z < size; z ++) {
-				
-					let d = (x * size * size * 3) + (y * size * 3) + z*3,
-					x0 = (x - b) / b;
-					y0 = (y - b) / b;
-					z0 = (z - b) / b;
-					
-				switch(face) {
-					case 0:
-						a[d] = x0*(1-(1-(y/size))*c);
-						a[d+1] = y0;
-						a[d+2] = z0*(1-(1-(y/size))*c);
-						break;
-					case 1:
-						a[d] = x0
-						a[d+1] = y0*(1-(1-(x/size))*c);;
-						a[d+2] = z0*(1-(1-(x/size))*c);
-						break;
-					case 2:
-						a[d] = x0*(1-(1-(z/size))*c);
-						a[d+1] = y0*(1-(1-(z/size))*c);
-						a[d+2] = z0;
-						break;
-					case 3:
-						a[d] = x0*(1-((y/size))*c);
-						a[d+1] = y0;
-						a[d+2] = z0*(1-((y/size))*c);
-						break;
-					case 4:
-						a[d] = x0*(1-(z/size)*c);
-						a[d+1] = y0*(1-(z/size)*c);
-						a[d+2] = z0;
-						break;
-					case 5:
-						a[d] = x0;
-						a[d+1] = y0*(1-(x/size)*c);
-						a[d+2] = z0*(1-(x/size)*c);
-						break;
+			for (let z = 0; z < size; z++) {
 
-				}
+				let d = (x * size * size * 3) + (y * size * 3) + z * 3,
+					x0 = (x - b) / b;
+				y0 = (y - b) / b;
+				z0 = (z - b) / b;
+
+				a[d] = x0 * (1 - (1 - (y / size)) * c);
+				a[d + 1] = y0;
+				a[d + 2] = z0 * (1 - (1 - (y / size)) * c);
+
 			}
 		}
 	}

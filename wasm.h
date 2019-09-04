@@ -12,6 +12,8 @@ typedef unsigned long long u64;
 typedef float f32;
 typedef double f64;
 
+extern u8 __heap_base;
+
 #define var __auto_type
 #define let __auto_type const
 
@@ -19,8 +21,8 @@ typedef double f64;
 #define unused __attribute__((unused))
 #define unreachable __builtin_unreachable()
 
-#define export extern "C"
-#define import extern "C"
+#define export
+#define import extern
 #ifdef DEBUG
 #define assume(x) assert(x)
 #else

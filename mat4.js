@@ -4,61 +4,90 @@ if (!('WebAssembly' in window)) {
 	console.error(msg);
 }
 function loadWebAssembly(filename, imports) {
-	return fetch(filename)
-		.then(response => response.arrayBuffer())
-		.then(buffer => WebAssembly.compile(buffer))
-		.then(module => {
-			imports = imports || {};
-			imports.env = imports.env || {};
-			if (!imports.env.memory) {
-				// Setup our Memory import, initializing it
-				// to use 256 pages of memory.
-				imports.env.memory = new WebAssembly.Memory({ initial: 256 });
-			}
-			if (!imports.env.__indirect_function_table) {
-				// Setup our Table with an inital size of 0,
-				// 'anyfunc' is currently the option here
-				imports.env.__indirect_function_table = new WebAssembly.Table({ initial: 0, element: 'anyfunc' });
-			}
+	imports = imports || {};
+	imports.env = imports.env || {};
+	if (!imports.env.memory) {
+		// Setup our Memory import, initializing it
+		// to use 256 pages of memory.
+		imports.env.memory = new WebAssembly.Memory({ initial: 256 });
+	}
+	if (!imports.env.__indirect_function_table) {
+		// Setup our Table with an inital size of 0,
+		// 'anyfunc' is currently the option here
+		imports.env.__indirect_function_table = new WebAssembly.Table({ initial: 0, element: 'anyfunc' });
+	}
 
 
-			imports.env.out = function consoleLogString(offset, length) {
+	imports.env.out = function consoleLogString(offset, length) {
 
-				let a = new Float32Array(imports.env.memory.buffer, offset, length);
-				console.log(a, offset, length);
-			}
-			// Create a WebAssembly instance with our compiled
-			// module and pass in our import object
-			return new WebAssembly.Instance(module, imports);
-		});
+		let a = new Float32Array(imports.env.memory.buffer, offset, length);
+		console.log(a, offset, length);
+	}
+
+	return WebAssembly.instantiateStreaming(fetch(filename), imports);
 }
-let i = {};
+let i = {
+	env: {
+		sinf: Math.sin,
+		cosf: Math.cos
+	}
+};
+
+window.mat4 = function (mat) {
+	this.mat = mat || allocate(16);
+}
+
 // Call our load function.
-loadWebAssembly('/src/mat4.wasm', i).then(instance => {
+loadWebAssembly('/mat4.wasm', i).then(({ instance }) => {
 	// Grab our exports and call our main function
 
 	var exports = instance.exports;
-	window.mat4 = {};
 	console.log(exports);
+
+	window.allocate = (size) => {
+		return new Float32Array(exports.memory.buffer, instance.exports.allocate(size), size);
+	}
 	window.mat4.projection = function (width, height, depth) {
 		var offset = exports.projection(width, height, depth);
 
-		return new Float32Array(i.env.memory.buffer, offset, 16);
+		return new mat4(new Float32Array(exports.memory.buffer, offset, 16));
 
 	}
 	window.mat4.translation = function (tx, ty, tz) {
 		var offset = exports.translation(tx, ty, tz);
 
-		return new Float32Array(i.env.memory.buffer, offset, 16);
+		return new mat4(new Float32Array(exports.memory.buffer, offset, 16));
 
 	}
-	window.mat4.multiply = function (a, b) {
-		var offset = exports.multiply(a.byteOffset, b.byteOffset);
-		return new Float32Array(i.env.memory.buffer, offset, 16);
 
+	mat4.prototype = {
+		multiply(b) {
+			exports.multiply(this.mat.byteOffset, b.byteOffset);
+		},
+		translate(x, y, z) {
+			exports.translate(this.mat.byteOffset, x, y, z);
+		},
+		scale(x, y, z) {
+			exports.scale(this.mat.byteOffset, x, y, z);
+		},
+		xRotate(angle) {
+			exports.xRotate(this.mat.byteOffset, angle);
+		},
+		yRotate(angle) {
+			exports.yRotate(this.mat.byteOffset, angle);
+		},
+		zRotate(angle) {
+			exports.zRotate(this.mat.byteOffset, angle);
+		}
 	}
+
+
+
 	console.log(exports.__heap_base.value);
-});
+})
+	.catch(e => {
+		console.log(e);
+	});
 /*
 let myArrayPtr = instance.exports.allocateF32Array(length);
 let myArray = new Float32Array(instance.exports.memory.buffer, myArrayPtr, length);
