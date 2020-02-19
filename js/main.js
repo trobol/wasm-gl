@@ -20,15 +20,11 @@ function main() {
 	// look up where the vertex data needs to go.
 	var positionLocation = gl.getAttribLocation(program, "a_position");
 
-	// lookup uniforms
-	var matrixLocation = gl.getUniformLocation(program, "u_matrix");
 	var timeLocation = gl.getUniformLocation(program, 'u_time');
-
 	// Create a buffer to put positions in
 	var positionBuffer = gl.createBuffer();
 
 	gl.enable(gl.BLEND);
-	gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
@@ -55,30 +51,10 @@ function main() {
 
 
 
+	randomizeVelocities();
 
 
-	setGeometry(gl);
 
-
-	var translation = [100, 70, 0];
-	var rotation = [1, 0, 0];
-	var scale = [200, 200, 200];
-
-
-	let r = rotation[1] * 20;
-	let t = (rotation[1] % 2) - rotation[1] % 1;
-
-	// Compute the matrices
-	var matrix = mat4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 1000);
-	var box = [translation[0] - scale[0], translation[1] - scale[1] * 2];
-	translation[0] = gl.canvas.clientWidth / 2 + (t) * (box[0] / 2);
-	translation[1] = gl.canvas.clientHeight / 2;
-
-	matrix.translate(translation[0], translation[1], translation[2]);
-	matrix.xRotate(rotation[0]);
-	matrix.yRotate(rotation[1]);
-	matrix.zRotate(rotation[2]);
-	matrix.scale(scale[0], scale[1], scale[2]);
 
 
 	drawScene(0);
@@ -89,40 +65,46 @@ function main() {
 	function drawScene(timeStamp) {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		matrix.xRotate(0.002);
-		matrix.yRotate(0.001);
-
-		gl.uniformMatrix4fv(matrixLocation, false, matrix.mat);
-
 		gl.resize();
 
 		gl.uniform1f(timeLocation, timeStamp / 1000);
-
-		gl.drawArrays(gl.Point, 0, 1000);
+		setGeometry(gl);
+		gl.drawArrays(gl.Point, 0, 200);
 
 		requestAnimationFrame(drawScene);
 	}
 }
+
+
+const buffer = new Float32Array(400);
+const velocities = new Float32Array(400);
+
+
+function randomizeVelocities() {
+
+
+	for(let i = 0; i < 400; i+=2) {
+		let v = Math.random();
+		let x = (Math.random()-0.5);
+		let y = Math.random();
+
+		let mag = Math.sqrt(x*x+y*y);
+		x /= mag;
+		y /= mag;
+		velocities[i] = x/50*v;
+		velocities[i+1] = y/50*v;
+	}
+}
 // Fill the buffer 
 function setGeometry(gl) {
-	let a = new Float32Array(3 * size * size * size);
-	let b = size / 2;
-	for (let x = 0; x < size; x++) {
-		for (let y = 0; y < size; y++) {
-			for (let z = 0; z < size; z++) {
-
-				let d = (x * size * size * 3) + (y * size * 3) + z * 3;
-
-				a[d] = (x - b) / b;
-				a[d + 1] = (y - b) / b;
-				a[d + 2] = (z - b) / b;
-
-			}
-		}
+	for(let i = 0; i < 400; i+=2) {
+		buffer[i] += velocities[i];
+		buffer[i+1] += velocities[i+1];
+		velocities[i+1] -= 0.0003;
 	}
 
 	gl.bufferData(
 		gl.ARRAY_BUFFER,
-		a,
+		buffer,
 		gl.STATIC_DRAW);
 }
